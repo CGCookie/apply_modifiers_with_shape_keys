@@ -1,0 +1,15 @@
+schema_version = "1.0.0"
+
+id = "apply_modifiers_with_shape_keys"
+version = "0.0.1"
+name = "Apply modifier with shape keys"
+tagline = "Applies modifiers on objects even if they have shape keys"
+maintainer = "Wayne Dixon <wayne@cgcookie.com>"
+
+type = "add-on"
+
+blender_version_min = "4.3.2"
+
+license = [
+  "SPDX:GPL-3.0-or-later",
+]

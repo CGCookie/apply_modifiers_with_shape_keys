@@ -2,8 +2,8 @@
 Copyright (C) 2025 Wayne Dixon
 wayen@cgcookie.com
 Created by Wayne Dixon
-    This file is part of Apply modifier with shape keys
-    Export to .blend is free software; you can redistribute it and/or
+    This file is part of Apply Modifiers With Shape Keys.
+    It is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
     as published by the Free Software Foundation; either version 3
     of the License, or (at your option) any later version.

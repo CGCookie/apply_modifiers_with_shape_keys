@@ -1,6 +1,6 @@
 '''
 Copyright (C) 2025 Wayne Dixon
-wayen@cgcookie.com
+wayne@cgcookie.com
 
 Created by Wayne Dixon
 

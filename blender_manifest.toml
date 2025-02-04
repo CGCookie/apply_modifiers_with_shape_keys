@@ -13,3 +13,15 @@ blender_version_min = "4.3.2"
 license = [
   "SPDX:GPL-3.0-or-later",
 ]
+
+[build]
+paths_exclude_pattern = [
+  "/.git/",
+  "__pycache__/",
+  "images/",
+  ".*",
+  "*.blend",
+  "*.blend[0123456789]",
+  "*.md",
+  "*.zip",
+]

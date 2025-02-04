@@ -15,18 +15,6 @@ Created by Wayne Dixon
     along with this program; if not, see <https://www.gnu.org/licenses/>.
 '''
 
-
-bl_info = {
-    "name": "Apply modifier with shape keys",
-    "author": "Wayne Dixon", 
-    "blender": (4, 3, 2),
-    "version": (0, 0, 1),
-    "location": "Shape Key Specials Menu",
-    "description": "Apply modifiers on mesh with shape keys (Avoids the error 'Modifier cannot be applied to a mesh with shape keys').",
-    "category": "Object"
-}
-
-
 import bpy
 
 # Local imports

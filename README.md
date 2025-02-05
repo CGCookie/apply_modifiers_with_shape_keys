@@ -39,9 +39,9 @@ It can be found in the **Shape Key Context Menu** or by using the search functio
 ### F3 Search
 You can also search for it in the 3D Viewport by pressing **F3** and typing **"Apply Modifiers with Shape Keys"**.
 
-![search box](images/f3-search.png)
+![search box](images/f3-search.png)  
 
-After activating the tool you will see a popup dialog box.
+After activating the tool you will see a popup dialog box.  
 ![popup dialog box](images/popup-dialog-box.png)
 
 
@@ -92,7 +92,7 @@ Is there a specific shape key that causes the operation to fail?
 If you can identify it, try removing that particular shape key. Once the problematic shape is removed, the others may succeed. You can always rebuild the troublesome shape afterward.
 
 #### Geometry Nodes:
-The add-on is designed to work with **mesh objects**. If you're using a **Geometry Nodes** setup, make sure that the output is a mesh object (not instances, for example). You may need to "realize" the instances so the output is truly a mesh object.
+The add-on is designed to work with **mesh objects**. If you're using a **Geometry Nodes** setup, make sure that the output is a mesh object (not instances, for example). You may need to "realize" the instances so the output is truly a mesh object.  
 ![realize instances](images/realize-instances.png)
 
 

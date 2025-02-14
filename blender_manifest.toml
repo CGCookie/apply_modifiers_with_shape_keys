@@ -1,7 +1,7 @@
 schema_version = "1.0.0"
 
 id = "apply_modifiers_with_shape_keys"
-version = "0.0.1"
+version = "1.0.0"
 name = "Apply modifier with shape keys"
 tagline = "Applies modifiers on objects even if they have shape keys"
 maintainer = "Wayne Dixon <wayne@cgcookie.com>"

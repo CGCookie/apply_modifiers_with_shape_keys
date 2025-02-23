@@ -8,6 +8,10 @@ maintainer = "Wayne Dixon <wayne@cgcookie.com>"
 
 type = "add-on"
 
+website = "https://github.com/CGCookie/apply_modifiers_with_shape_keys"
+
+tags = ["Animation", "Modeling", "Rigging"]
+
 blender_version_min = "4.3.2"
 
 license = [

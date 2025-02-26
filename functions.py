@@ -203,7 +203,7 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers, disable_armatur
     disabled_armature_modifiers = disable_armature_modifiers(context, selected_modifiers, disable_armatures)
 
     # Save the pin option setting and active shape key index
-    pin_setting = bpy.data.objects[original_obj.name].show_only_shape_key
+    pin_setting = original_obj.show_only_shape_key
     saved_active_shape_key_index = original_obj.active_shape_key_index
 
     # Duplicate the object
@@ -283,7 +283,7 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers, disable_armatur
             modifier.show_viewport = True
 
     # Restore the pin option setting and active shape key index
-    bpy.data.objects[original_obj.name].show_only_shape_key = pin_setting
+    original_obj.show_only_shape_key = pin_setting
     original_obj.active_shape_key_index =  saved_active_shape_key_index
 
     # Make sure the original object is selected before finishing

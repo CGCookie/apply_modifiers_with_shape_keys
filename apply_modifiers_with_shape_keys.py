@@ -46,7 +46,7 @@ class OBJECT_OT_apply_modifiers_with_shape_keys(bpy.types.Operator):
     def poll(cls, context):
         active_object = context.active_object
         # Check if the active object is a mesh, has shape keys, and is in Object mode
-        return active_object and active_object.type == 'MESH' and active_object.data.shape_keys and context.object.mode == 'OBJECT'
+        return active_object and active_object.data.shape_keys and context.object.mode == 'OBJECT'
 
     def execute(self, context):
         selected_modifiers = [o.name for o in self.collection_property if o.apply_modifier]

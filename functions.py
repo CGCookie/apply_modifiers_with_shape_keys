@@ -55,8 +55,8 @@ def apply_modifier_to_object(context, obj, selected_modifiers):
 def save_shape_key_properties(obj, properties):
     ''' This function will save the settings on the shape keys (min/max etc) '''
     properties_list = []
-    for key_block in obj.data.shape_keys.key_blocks:
-        if key_block.name == "Basis":
+    for idx, key_block in enumerate(obj.data.shape_keys.key_blocks): # will skip index 0 (Basis)
+        if idx == 0:
             continue
         properties_object = {p: getattr(key_block, p) for p in properties}
         properties_list.append(properties_object)
@@ -65,8 +65,8 @@ def save_shape_key_properties(obj, properties):
 
 def restore_shape_key_properties(obj, properties_list):
     ''' Restores the settings for each shape key (min/max etc) '''
-    for idx, key_block in enumerate(obj.data.shape_keys.key_blocks):
-        if key_block.name == "Basis":
+    for idx, key_block in enumerate(obj.data.shape_keys.key_blocks): # will skip index 0 (Basis)
+        if idx == 0:
             continue
         for prop, value in properties_list[idx - 1].items():
             setattr(key_block, prop, value)

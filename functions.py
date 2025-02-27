@@ -216,7 +216,10 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers, disable_armatur
     context.view_layer.objects.active = original_obj
 
     # Save the shape key properties
-    properties = ["name", "mute", "lock_shape", "value", "slider_min", "slider_max", "vertex_group", "relative_key"]
+    shape_key = original_obj.data.shape_keys.key_blocks[0]
+    properties = {prop.identifier: getattr(shape_key, prop.identifier)
+                  for prop in shape_key.bl_rna.properties if not prop.is_readonly}
+
     shape_key_properties = save_shape_key_properties(original_obj, properties)
 
     # Copy drivers for shape keys (from the copy because the original ones will be gone in a moment)

@@ -196,8 +196,7 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers, disable_armatur
     error_message = None
 
     if shapes_count == 1: # if there is only a Basis shape, delete the shape and apply the modifiers
-        original_obj.active_shape_key_index = 0
-        bpy.ops.object.shape_key_remove()
+        original_obj.shape_key_remove(original_obj.data.shape_keys.key_blocks[0])
         apply_modifier_to_object(context, original_obj, selected_modifiers)
         return True, None
 

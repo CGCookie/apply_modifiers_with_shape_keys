@@ -229,7 +229,7 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers, disable_armatur
     apply_modifier_to_object(context, original_obj, selected_modifiers)
 
     # Add a basis shape key back to the original object
-    original_obj.shape_key_add(name='Basis',from_mix=False)
+    original_obj.shape_key_add(name=copy_obj.data.shape_keys.key_blocks[0].name,from_mix=False)
 
     # Loop over the original shape keys, create a temp mesh, apply single shape, apply modifers and merge back to the original (1 shape at a time)
     for i, shape_properties in enumerate(shape_key_properties):

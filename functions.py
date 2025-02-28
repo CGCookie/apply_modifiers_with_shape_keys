@@ -35,10 +35,12 @@ def disable_armature_modifiers(context, selected_modifiers, disable_armatures):
 
 
 def duplicate_object(obj):
-    bpy.ops.object.select_all(action='DESELECT')
-    obj.select_set(True)
-    bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked": False, "mode": 'TRANSLATION'}, TRANSFORM_OT_translate={"value": (0, 0, 0)})
-
+    new_obj = obj.copy()
+    new_obj.data = obj.data.copy()
+    bpy.context.collection.objects.link(new_obj)
+    bpy.context.view_layer.objects.active = new_obj
+    return new_obj
+    
 
 def apply_modifier_to_object(context, obj, selected_modifiers):
     bpy.context.view_layer.objects.active = obj
@@ -208,8 +210,7 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers, disable_armatur
     saved_active_shape_key_index = original_obj.active_shape_key_index
 
     # Duplicate the object
-    duplicate_object(original_obj)
-    copy_obj = context.view_layer.objects.active
+    copy_obj = duplicate_object(original_obj)
 
     # Make the Original Object the active object
     context.view_layer.objects.active = original_obj

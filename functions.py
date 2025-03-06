@@ -223,6 +223,11 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers, disable_armatur
 
         # disable all modifiers (except selected)
         disabled_modifiers = disable_modifiers(context, selected_modifiers)
+
+        # Make sure all selected modifers are enabled
+        for modifier_name in selected_modifiers:
+            modifier = original_obj.modifiers.get(modifier_name)
+            modifier.show_viewport = True
         
         # evaluate new mesh and swap it out
         new_mesh = evaluate_mesh(context, original_obj)

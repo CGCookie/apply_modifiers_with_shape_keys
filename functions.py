@@ -21,18 +21,6 @@ import re
 
 
 # Helper functions
-def disable_armature_modifiers(context, selected_modifiers, disable_armatures):
-    ''' if there is an armature modifier on the mesh, you can disable it so it doesn't affect the deformation
-    it will be reset back after the add-on is finished '''
-    disabled_armature_modifiers = []
-    if disable_armatures:
-        for modifier in context.object.modifiers:
-            if modifier.type == 'ARMATURE' and modifier.show_viewport:
-                if modifier.name not in selected_modifiers:
-                    disabled_armature_modifiers.append(modifier)
-                    modifier.show_viewport = False
-    return disabled_armature_modifiers
-
 def disable_modifiers(context, selected_modifiers):
     ''' disables any modifiers that are not selected so the mesh can be calculated
     it will be reset back after the add-on is finished '''
@@ -52,7 +40,6 @@ def duplicate_object(obj):
     bpy.context.view_layer.objects.active = new_obj
     return new_obj
 
-# WORKING ON ADDING THIS
 def evaluate_mesh(context, obj):
     """Low-level alternative to `bpy.ops.object.convert` for converting to meshes"""
 
@@ -211,7 +198,7 @@ def copy_shape_key_animation(source_obj, target_obj):
 
 
 # Primary function (this gets imported and used by the operator)
-def apply_modifiers_with_shape_keys(context, selected_modifiers, disable_armatures):
+def apply_modifiers_with_shape_keys(context, selected_modifiers):
     ''' Apply the selected modifiers to the mesh even if it has shape keys '''
     original_obj = context.view_layer.objects.active
     shapes_count = len(original_obj.data.shape_keys.key_blocks) if original_obj.data.shape_keys else 0
@@ -248,9 +235,6 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers, disable_armatur
             modifier.show_viewport = True
 
         return True, None
-
-    # Disable armatures if necessary
-    disabled_armature_modifiers = disable_armature_modifiers(context, selected_modifiers, disable_armatures)
 
     # Save the pin option setting and active shape key index
     pin_setting = original_obj.show_only_shape_key
@@ -328,11 +312,6 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers, disable_armatur
 
     # Clean up the duplicate object
     bpy.data.objects.remove(copy_obj)
-
-    # Re-enable armature modifiers
-    if disable_armatures:
-        for modifier in disabled_armature_modifiers:
-            modifier.show_viewport = True
 
     # Restore the pin option setting and active shape key index
     original_obj.show_only_shape_key = pin_setting

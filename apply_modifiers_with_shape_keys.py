@@ -39,7 +39,6 @@ class OBJECT_OT_apply_modifiers_with_shape_keys(bpy.types.Operator):
     bl_label = "Apply modifier(s) for mesh with shape keys"
     bl_options = {'REGISTER', 'UNDO'}
 
-    disable_armatures: bpy.props.BoolProperty(name="Exclude armature deformation", default=True)
     collection_property: bpy.props.CollectionProperty(type=ModifierList)
 
     @classmethod
@@ -54,7 +53,7 @@ class OBJECT_OT_apply_modifiers_with_shape_keys(bpy.types.Operator):
             self.report({'ERROR'}, 'No modifiers selected!')
             return {'FINISHED'}
 
-        success, error_info = apply_modifiers_with_shape_keys(context, selected_modifiers, self.disable_armatures)
+        success, error_info = apply_modifiers_with_shape_keys(context, selected_modifiers)
         if not success:
             self.report({'ERROR'}, error_info)
 
@@ -67,14 +66,7 @@ class OBJECT_OT_apply_modifiers_with_shape_keys(bpy.types.Operator):
         
         for prop in self.collection_property:
             box.prop(prop, "apply_modifier", text=prop.name)
-            for modifier in context.object.modifiers:
-                if modifier.type == 'ARMATURE' and modifier.show_viewport:
-                    show_armature_option = True
 
-        # only show this if there is an enabled armature modifier on the mesh
-        if show_armature_option: 
-            self.layout.separator() 
-            self.layout.prop(self, "disable_armatures")
 
     def invoke(self, context, event):
         self.collection_property.clear()

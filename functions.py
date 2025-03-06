@@ -33,6 +33,17 @@ def disable_armature_modifiers(context, selected_modifiers, disable_armatures):
                     modifier.show_viewport = False
     return disabled_armature_modifiers
 
+def disable_modifiers(context, selected_modifiers):
+    ''' disables any modifiers that are not selected so the mesh can be calculated
+    it will be reset back after the add-on is finished '''
+    disabled_modifiers = []
+
+    for modifier in context.object.modifiers:
+        if modifier.name not in selected_modifiers and modifier.show_viewport:
+            disabled_modifiers.append(modifier)
+            modifier.show_viewport = False
+    return disabled_modifiers
+
 
 def duplicate_object(obj):
     new_obj = obj.copy()
@@ -40,7 +51,16 @@ def duplicate_object(obj):
     bpy.context.collection.objects.link(new_obj)
     bpy.context.view_layer.objects.active = new_obj
     return new_obj
-    
+
+# WORKING ON ADDING THIS
+def evaluate_mesh(context, obj):
+    """Low-level alternative to `bpy.ops.object.convert` for converting to meshes"""
+
+    depsgraph = context.evaluated_depsgraph_get()
+    eval_obj = obj.evaluated_get(depsgraph)
+    mesh = bpy.data.meshes.new_from_object(eval_obj, preserve_all_data_layers=True, depsgraph=depsgraph)
+
+    return mesh
 
 def apply_modifier_to_object(context, obj, selected_modifiers):
     bpy.context.view_layer.objects.active = obj
@@ -198,8 +218,28 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers, disable_armatur
     error_message = None
 
     if shapes_count == 1: # if there is only a Basis shape, delete the shape and apply the modifiers
+        # Delete the Basis shape
         original_obj.shape_key_remove(original_obj.data.shape_keys.key_blocks[0])
-        apply_modifier_to_object(context, original_obj, selected_modifiers)
+
+        # disable all modifiers (except selected)
+        disabled_modifiers = disable_modifiers(context, selected_modifiers)
+        
+        # evaluate new mesh and swap it out
+        new_mesh = evaluate_mesh(context, original_obj)
+        old_mesh = original_obj.data
+        original_obj.data = new_mesh
+        
+        # Delete the selected modifiers from the object
+        for modifier in selected_modifiers:
+            original_obj.modifiers.remove(original_obj.modifiers[modifier])
+
+        # Delete the old mesh
+        bpy.data.meshes.remove(old_mesh)
+
+        # restore the enabled modifiers
+        for modifier in disabled_modifiers:
+            modifier.show_viewport = True
+
         return True, None
 
     # Disable armatures if necessary

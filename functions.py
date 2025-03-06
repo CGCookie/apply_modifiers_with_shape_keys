@@ -227,14 +227,16 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers, disable_armatur
         # evaluate new mesh and swap it out
         new_mesh = evaluate_mesh(context, original_obj)
         old_mesh = original_obj.data
+        old_mesh_name = old_mesh.name
         original_obj.data = new_mesh
         
         # Delete the selected modifiers from the object
         for modifier in selected_modifiers:
             original_obj.modifiers.remove(original_obj.modifiers[modifier])
 
-        # Delete the old mesh
+        # Delete the old mesh and rename the data block
         bpy.data.meshes.remove(old_mesh)
+        original_obj.data.name = old_mesh_name
 
         # restore the enabled modifiers
         for modifier in disabled_modifiers:

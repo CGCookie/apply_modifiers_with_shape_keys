@@ -213,7 +213,6 @@ def copy_shape_key_animation(source_obj, target_obj):
     # Link the existing action to the target object
     target_obj.data.shape_keys.animation_data_create()  # Create animation data for the target object if needed
     target_obj.data.shape_keys.animation_data.action = source_obj.data.shape_keys.animation_data.action
-
     # print(f"Shape key animations copied from {source_obj.name} to {target_obj.name}.") # DEBUG
 
 
@@ -273,7 +272,7 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers):
         for modifier in temp_obj.modifiers:
             modifier.show_viewport = False
         
-        # apply the selected modifiers
+        # Now freeze the mesh by applying the selected modifiers
         apply_modifier_to_object(context, temp_obj, selected_modifiers)
         
         # Verify the meshes have the same amount of verts

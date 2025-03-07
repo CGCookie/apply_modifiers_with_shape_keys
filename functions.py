@@ -22,15 +22,15 @@ import re
 
 # Helper functions
 def disable_modifiers(context, selected_modifiers):
-    ''' disables any modifiers that are not selected so the mesh can be calculated
-    it will be reset back after the add-on is finished '''
-    disabled_modifiers = []
+    ''' disables any modifiers that are not selected so the mesh can be calculated.
+    Returns a list of modifiers it changed so they can be reset later '''
+    saved_enabled_modifiers = []
 
     for modifier in context.object.modifiers:
         if modifier.name not in selected_modifiers and modifier.show_viewport:
-            disabled_modifiers.append(modifier)
+            saved_enabled_modifiers.append(modifier)
             modifier.show_viewport = False
-    return disabled_modifiers
+    return saved_enabled_modifiers
 
 
 def duplicate_object(obj):
@@ -40,25 +40,45 @@ def duplicate_object(obj):
     bpy.context.view_layer.objects.active = new_obj
     return new_obj
 
+
 def evaluate_mesh(context, obj):
     """Low-level alternative to `bpy.ops.object.convert` for converting to meshes"""
-
     depsgraph = context.evaluated_depsgraph_get()
     eval_obj = obj.evaluated_get(depsgraph)
     mesh = bpy.data.meshes.new_from_object(eval_obj, preserve_all_data_layers=True, depsgraph=depsgraph)
 
     return mesh
 
+
 def apply_modifier_to_object(context, obj, selected_modifiers):
     bpy.context.view_layer.objects.active = obj
+
+    # Disable all modifiers (except selected)
+    saved_enabled_modifiers = disable_modifiers(context, selected_modifiers)
+
+    # Make sure all selected modifers are enabled
     for modifier_name in selected_modifiers:
         modifier = obj.modifiers.get(modifier_name)
-        if modifier and not modifier.show_viewport: # enables the modifier before trying to apply it
+        modifier.show_viewport = True
+
+    # evaluate new mesh and swap it out
+    new_mesh = evaluate_mesh(context, obj)
+    old_mesh = obj.data
+    old_mesh_name = old_mesh.name
+    obj.data = new_mesh
+    
+    # Delete the selected modifiers from the object
+    for modifier in selected_modifiers:
+        obj.modifiers.remove(obj.modifiers[modifier])
+
+    # Delete the old mesh and rename the data block
+    bpy.data.meshes.remove(old_mesh)
+    obj.data.name = old_mesh_name
+
+    # restore the previously enabled modifiers
+    if len(saved_enabled_modifiers) > 0:
+        for modifier in saved_enabled_modifiers:
             modifier.show_viewport = True
-        try:
-            bpy.ops.object.modifier_apply(modifier=modifier_name)
-        except RuntimeError:
-            print(f"Skipping broken modifier: {modifier_name}")
 
 
 def save_shape_key_properties(obj, properties):
@@ -84,7 +104,7 @@ def restore_shape_key_properties(obj, properties_list):
 def copy_shape_key_drivers(obj, shape_key_properties):
     ''' Copy drivers for shape key properties '''
 
-    drivers = {}
+    drivers = {}    
 
     # Ensure the object has a shape keys animation data
     if not obj.data.shape_keys.animation_data:
@@ -205,35 +225,8 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers):
     error_message = None
 
     if shapes_count == 1: # if there is only a Basis shape, delete the shape and apply the modifiers
-        # Delete the Basis shape
         original_obj.shape_key_remove(original_obj.data.shape_keys.key_blocks[0])
-
-        # disable all modifiers (except selected)
-        disabled_modifiers = disable_modifiers(context, selected_modifiers)
-
-        # Make sure all selected modifers are enabled
-        for modifier_name in selected_modifiers:
-            modifier = original_obj.modifiers.get(modifier_name)
-            modifier.show_viewport = True
-        
-        # evaluate new mesh and swap it out
-        new_mesh = evaluate_mesh(context, original_obj)
-        old_mesh = original_obj.data
-        old_mesh_name = old_mesh.name
-        original_obj.data = new_mesh
-        
-        # Delete the selected modifiers from the object
-        for modifier in selected_modifiers:
-            original_obj.modifiers.remove(original_obj.modifiers[modifier])
-
-        # Delete the old mesh and rename the data block
-        bpy.data.meshes.remove(old_mesh)
-        original_obj.data.name = old_mesh_name
-
-        # restore the enabled modifiers
-        for modifier in disabled_modifiers:
-            modifier.show_viewport = True
-
+        apply_modifier_to_object(context, original_obj, selected_modifiers)
         return True, None
 
     # Save the pin option setting and active shape key index
@@ -272,26 +265,23 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers):
 
         # Pin the shape we want
         bpy.data.objects[temp_obj.name].show_only_shape_key = True
-        temp_obj.active_shape_key_index = i + 1
+        temp_obj.active_shape_key_index = i + 1 
         shape_key_name = temp_obj.active_shape_key.name
+        temp_obj_old_mesh = temp_obj.data
 
-        # Apply the shape key to freeze the mesh in that position, then apply the modifiers
-        for window in context.window_manager.windows:
-            screen = window.screen
-            for area in screen.areas:
-                if area.type == 'VIEW_3D':
-                    with context.temp_override(window=window, area=area):
-                        bpy.ops.object.shape_key_remove(all=True, apply_mix=True)
-                        apply_modifier_to_object(context, temp_obj, selected_modifiers)
-                    break
-
+        # Disable all modifiers (including selected)
+        for modifier in temp_obj.modifiers:
+            modifier.show_viewport = False
+        
+        # apply the selected modifiers
+        apply_modifier_to_object(context, temp_obj, selected_modifiers)
+        
         # Verify the meshes have the same amount of verts
         if len(original_obj.data.vertices) != len(temp_obj.data.vertices):
-            error_message = f"{shape_key_name} failed because the mesh no longer have the same amount of vertices after applying the modifiers."
+            error_message = f"{shape_key_name} failed because the mesh no longer have the same amount of vertices after applying selected modifier(s)."
             # Clean up the temp object and try to move on
             bpy.data.objects.remove(temp_obj)
             continue
-
 
         # Transfer the temp object as a shape back to orginal
         temp_obj.select_set(True)

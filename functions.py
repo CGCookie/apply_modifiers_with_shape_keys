@@ -46,11 +46,15 @@ def evaluate_mesh(context, obj):
     depsgraph = context.evaluated_depsgraph_get()
     eval_obj = obj.evaluated_get(depsgraph)
     mesh = bpy.data.meshes.new_from_object(eval_obj, preserve_all_data_layers=True, depsgraph=depsgraph)
-
     return mesh
 
 
 def apply_modifier_to_object(context, obj, selected_modifiers):
+    ''' Disables all modifers except the selected ones
+    Creates a new mesh from that output and swaps it out
+    Removes the selected modifiers
+    Deletes the old mesh and restores the other modifiers to what they were
+    '''
     bpy.context.view_layer.objects.active = obj
 
     # Disable all modifiers (except selected)

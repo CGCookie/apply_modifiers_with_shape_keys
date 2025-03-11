@@ -55,7 +55,7 @@ def apply_modifier_to_object(context, obj, selected_modifiers):
     Removes the selected modifiers
     Deletes the old mesh and restores the other modifiers to what they were
     '''
-    bpy.context.view_layer.objects.active = obj
+    context.view_layer.objects.active = obj
 
     # Disable all modifiers (except selected)
     saved_enabled_modifiers = disable_modifiers(context, selected_modifiers)
@@ -70,7 +70,7 @@ def apply_modifier_to_object(context, obj, selected_modifiers):
     old_mesh = obj.data
     old_mesh_name = old_mesh.name
     obj.data = new_mesh
-    
+
     # Delete the selected modifiers from the object
     for modifier in selected_modifiers:
         obj.modifiers.remove(obj.modifiers[modifier])
@@ -298,13 +298,13 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers):
         restore_shape_key_drivers(original_obj, copy_obj, shape_key_drivers, context)
 
         # Clean up the temp object
-        bpy.data.objects.remove(temp_obj)
+        bpy.data.meshes.remove(temp_obj.data)
 
     # Restore any shape key animation
     copy_shape_key_animation(copy_obj, original_obj)
 
     # Clean up the duplicate object
-    bpy.data.objects.remove(copy_obj)
+    bpy.data.meshes.remove(copy_obj.data)
 
     # Restore the pin option setting and active shape key index
     original_obj.show_only_shape_key = pin_setting

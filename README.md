@@ -50,30 +50,27 @@ After activating the tool you will see a popup dialog box.
 Chose which modifiers to apply and click OK
 
 
-### Exclude Armature Deformation
-
-If there is an armature modifier on the active mesh (and it is enabled).  You will see an option to exlcude this deformation when applying the other modifiers.  This will temporarily disable the armature modifier so it does not influence the mesh when the other modifiers are being applied and will be re-enabled at the end.
-
 ## How it Functions
 
 1. **Duplicate Mesh**:  
-    - The add-on creates a duplicate of the original mesh, removes all the shape keys, and applies the selected modifier(s).
+    - The add-on creates a duplicate of the original mesh, removes all the shape keys, and applies the selected modifier(s) by evaluating the mesh and swapping it out (it avoids using the apply modifiers operator).
 
 2. **Loop through Shape Keys**:  
     - For each shape key, it creates another duplicate of the mesh.
-    - It applies just that single shape key along with the selected modifier(s).
-    - It then merges this modified shape key back into the original mesh.
+    - It evaluates the mesh with just that single shape key active with the selected modifier(s) enabled.
+    - It then merges this new mesh back into the original as a shape key.
+    (it also avoids using the apply modifier operator)
 
 3. **Restore Shape Keys**:  
     - After processing all the shape keys, the add-on restores the original shape key values, animation data, and drivers (if applicable) on the original mesh.
 
-This process is done one shape key at a time to reduce the memory load on your machine, which is important if you're working with a high-density mesh (e.g., 200+ copies of a complex mesh).
+This process is done one shape key at a time to reduce the memory load on your machine, which is important if you're working with a high-density mesh and a lot of shape keys.
 
 ## Troubleshooting
 
-Theoretically, if you can apply the modifiers to the base shape and all your shape keys and the resulting meshes have the same number of vertices, the add-on will work with any modifier.
+Theoretically, if you can apply the modifiers to the base shape, and all your shape keys and the resulting meshes have the same number of vertices, the add-on will work with any modifier.
 
-However, as you may know, several Blender modifiers can change the number of vertices on the base mesh (e.g., Subdivision Surface, Mirror modifier with Bisect or Merge enabled, Geometry Nodes, etc.). This can cause problems because Blender can only join meshes with shape keys if they have the same number of vertices.
+However, as you may know, several Blender modifiers can change the number of vertices on the base mesh (e.g. Subdivision Surface, Mirror modifier with Bisect or Merge enabled, Geometry Nodes, etc.). This can cause problems because Blender can only join meshes with shape keys if they have the same number of vertices.
 
 ### What to Do If the Add-on Doesn't Work as Expected
 

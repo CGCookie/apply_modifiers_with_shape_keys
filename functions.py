@@ -267,7 +267,7 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers):
         temp_obj = bpy.context.active_object
 
         # Pin the shape we want
-        bpy.data.objects[temp_obj.name].show_only_shape_key = True
+        temp_obj.show_only_shape_key = True
         temp_obj.active_shape_key_index = i + 1 
         shape_key_name = temp_obj.active_shape_key.name
         temp_obj_old_mesh = temp_obj.data

@@ -86,34 +86,36 @@ def apply_modifier_to_object(context, obj, selected_modifiers):
             modifier.show_viewport = True
 
 
-def save_shape_key_properties(obj, properties):
-    ''' This function will save the settings on the shape keys (min/max etc) '''
-    properties_list = []
+def save_shape_key_properties(obj):
+    ''' This function will save the settings on the shape keys (min/max etc) and return them as a dictionary'''
+    properties_dict = {}
     for idx, key_block in enumerate(obj.data.shape_keys.key_blocks): # will skip index 0 (Basis)
         if idx == 0:
             continue
-        properties_object = {p: getattr(key_block, p) for p in properties}
-        properties_list.append(properties_object)
-    return properties_list
+        properties_object = {p.identifier: getattr(key_block, p.identifier) for p in key_block.bl_rna.properties if not p.is_readonly}
+        properties_dict[key_block.name] = {"properties": properties_object}
+    return properties_dict
 
 
-def restore_shape_key_properties(obj, properties_list):
+def restore_shape_key_properties(obj, property_dict):
     ''' Restores the settings for each shape key (min/max etc) '''
     for idx, key_block in enumerate(obj.data.shape_keys.key_blocks): # will skip index 0 (Basis)
         if idx == 0:
             continue
-        for prop, value in properties_list[idx - 1].items():
-            setattr(key_block, prop, value)
+        properties = list(property_dict.items())[idx - 1][1]['properties']
+        for prop, value in properties.items():
+                setattr(key_block, prop, value)
 
 
-def copy_shape_key_drivers(obj, shape_key_properties):
-    ''' Copy drivers for shape key properties '''
+def copy_shape_key_drivers(obj, property_dict):
+    ''' Copy drivers for shape key properties by checking the property dictionary against the driver paths.
+    returns a new dictionary with the drivers and the properties on the shape keys they drive'''
 
-    drivers = {}    
+    drivers = {}
 
-    # Ensure the object has a shape keys animation data
+    # Ensure the object has shape keys animation data
     if not obj.data.shape_keys.animation_data:
-        # print(f"No animation data found for {obj.name}.") # DEBUG
+        # print(f"No animation data found for {obj.name}.")  # DEBUG
         return drivers
 
     # Loop through all the drivers in the shape keys animation data
@@ -126,24 +128,25 @@ def copy_shape_key_drivers(obj, shape_key_properties):
         if len(data_path_parts) > 1:
             property_name = data_path_parts[-1]  # The last part of the data path is the property name (e.g. 'value', 'slider_min', 'slider_max')
 
-            if property_name not in shape_key_properties:
-                continue  # Skip if the property isn't one we care about
+            # Check if the property is in the dictionary
+            properties = list(property_dict.items())
 
-            # Find the shape key name
+            # Find the shape key name using a regular expression
             match = re.search(r'key_blocks\["(.*)"\]', driver.data_path)
+
             shape_key_name = match.group(1)
 
             # Create a dictionary for the driver data
             driver_data = {
                 "driver": driver,
-                "property": property_name 
+                "property": property_name
             }
 
             # Append the driver data to the shape_key_drivers list
-            shape_key_drivers.append(driver_data)
+            if shape_key_name not in drivers:
+                drivers[shape_key_name] = []
 
-        if shape_key_drivers:
-            drivers[shape_key_name] = shape_key_drivers
+            drivers[shape_key_name].append(driver_data)
 
     return drivers
 
@@ -167,9 +170,6 @@ def restore_shape_key_drivers(obj, copy_obj,drivers, context):
 
             # Add the driver to the shape key property
             try:
-                # Remove any drivers or animation on the shape keys
-                obj.data.shape_keys.animation_data_clear()
-
                 new_driver = shape_key_block.driver_add(property_name)
 
                 # set the type
@@ -241,14 +241,10 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers):
     copy_obj = duplicate_object(original_obj)
 
     # Save the shape key properties
-    shape_key = original_obj.data.shape_keys.key_blocks[0]
-    properties = {prop.identifier: getattr(shape_key, prop.identifier)
-                  for prop in shape_key.bl_rna.properties if not prop.is_readonly}
-
-    shape_key_properties = save_shape_key_properties(original_obj, properties)
+    shape_key_properties = save_shape_key_properties(original_obj)
 
     # Copy drivers for shape keys (from the copy because the original ones will be gone in a moment)
-    shape_key_drivers = copy_shape_key_drivers(copy_obj, properties)
+    shape_key_drivers = copy_shape_key_drivers(copy_obj, shape_key_properties[original_obj.active_shape_key.name])
 
     # Remove all shape keys and apply modifiers on the original
     bpy.ops.object.shape_key_remove(all=True)
@@ -258,7 +254,7 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers):
     original_obj.shape_key_add(name=copy_obj.data.shape_keys.key_blocks[0].name,from_mix=False)
 
     # Loop over the original shape keys, create a temp mesh, apply single shape, apply modifers and merge back to the original (1 shape at a time)
-    for i, shape_properties in enumerate(shape_key_properties):
+    for i, (key_block_name, properties) in enumerate(shape_key_properties.items()):
         # Create a temp object
         context.view_layer.objects.active = copy_obj
         temp_obj = duplicate_object(copy_obj)

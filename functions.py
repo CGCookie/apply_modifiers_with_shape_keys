@@ -34,6 +34,7 @@ def disable_modifiers(context, selected_modifiers):
 
 
 def duplicate_object(obj):
+    '''Copy the object, make it active and return it '''
     new_obj = obj.copy()
     new_obj.data = obj.data.copy()
     bpy.context.collection.objects.link(new_obj)
@@ -239,9 +240,6 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers):
     # Duplicate the object
     copy_obj = duplicate_object(original_obj)
 
-    # Make the Original Object the active object
-    context.view_layer.objects.active = original_obj
-
     # Save the shape key properties
     shape_key = original_obj.data.shape_keys.key_blocks[0]
     properties = {prop.identifier: getattr(shape_key, prop.identifier)
@@ -263,8 +261,7 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers):
     for i, shape_properties in enumerate(shape_key_properties):
         # Create a temp object
         context.view_layer.objects.active = copy_obj
-        duplicate_object(copy_obj)
-        temp_obj = bpy.context.active_object
+        temp_obj = duplicate_object(copy_obj)
 
         # Pin the shape we want
         temp_obj.show_only_shape_key = True

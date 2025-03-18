@@ -106,6 +106,23 @@ def restore_shape_key_properties(obj, property_dict):
         for prop, value in properties.items():
                 setattr(key_block, prop, value)
 
+def join_as_shape(temp_obj, original_obj):
+    '''Join the temp object back to the original as a shape key 
+    Vertex positions are transferred by index.
+    Different number of vertices or index will give unpredictable results
+    '''
+
+    # create a basis shape on the temp object to make the next step easier
+    temp_obj_shape = temp_obj.shape_key_add(from_mix=False)
+    # temp_obj_verts = temp_obj.data.shape_keys.key_blocks[1:]
+    new_org_shape = original_obj.shape_key_add(from_mix=False)
+
+    # Transfer Vertex Positions
+    for source_vert, target_vert in zip(temp_obj_shape.data, new_org_shape.data):
+        target_vert.co = source_vert.co
+
+    # return {'FINISHED'}
+
 
 def copy_shape_key_drivers(obj, property_dict):
     ''' Copy drivers for shape key properties by checking the property dictionary against the driver paths.
@@ -280,9 +297,7 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers):
             continue
 
         # Transfer the temp object as a shape back to orginal
-        temp_obj.select_set(True)
-        context.view_layer.objects.active = original_obj
-        bpy.ops.object.join_shapes()
+        join_as_shape(temp_obj, original_obj)
 
         # Clean up the temp object
         bpy.data.meshes.remove(temp_obj.data)
@@ -303,8 +318,8 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers):
     original_obj.show_only_shape_key = pin_setting
     original_obj.active_shape_key_index =  saved_active_shape_key_index
 
-    # Make sure the original object is selected before finishing
-    original_obj.select_set(True)
+    # Make sure the original object is active before finishing
+    context.view_layer.objects.active = original_obj
 
     # Report the error message if any
     if error_message:

@@ -311,11 +311,11 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers):
     # Restore shape key properties
     restore_shape_key_properties(original_obj, shape_key_properties)
 
-    # Restore any shape key drivers
-    restore_shape_key_drivers(original_obj, copy_obj, shape_key_drivers, context)
-
     # Restore any shape key animation
     copy_shape_key_animation(copy_obj, original_obj)
+
+    # Restore any shape key drivers
+    restore_shape_key_drivers(original_obj, copy_obj, shape_key_drivers, context)
 
     # Clean up the duplicate object
     bpy.data.meshes.remove(copy_obj.data)

@@ -124,7 +124,7 @@ def join_as_shape(temp_obj, original_obj):
     # return {'FINISHED'}
 
 
-def copy_shape_key_drivers(obj, property_dict):
+def save_shape_key_drivers(obj, property_dict):
     ''' Copy drivers for shape key properties by checking the property dictionary against the driver paths.
     returns a new dictionary with the drivers and the properties on the shape keys they drive'''
 
@@ -233,8 +233,14 @@ def copy_shape_key_animation(source_obj, target_obj):
         return
 
     # Link the existing action to the target object
-    target_obj.data.shape_keys.animation_data_create()  # Create animation data for the target object if needed
+    if not target_obj.data.shape_keys.animation_data:
+        target_obj.data.shape_keys.animation_data_create()  # Create animation data for the target shape key if needed
     target_obj.data.shape_keys.animation_data.action = source_obj.data.shape_keys.animation_data.action
+    
+    # Link the existing action slot to the action (Blender ver > 4.4)
+    if bpy.app.version >= (4, 4, 0):
+        target_obj.data.shape_keys.animation_data.action_slot = source_obj.data.shape_keys.animation_data.action_slot
+
     # print(f"Shape key animations copied from {source_obj.name} to {target_obj.name}.") # DEBUG
 
 
@@ -261,7 +267,7 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers):
     shape_key_properties = save_shape_key_properties(original_obj)
 
     # Copy drivers for shape keys (from the copy because the original ones will be gone in a moment)
-    shape_key_drivers = copy_shape_key_drivers(copy_obj, shape_key_properties[original_obj.active_shape_key.name])
+    shape_key_drivers = save_shape_key_drivers(copy_obj, shape_key_properties[original_obj.active_shape_key.name])
 
     # Remove all shape keys and apply modifiers on the original
     bpy.ops.object.shape_key_remove(all=True)

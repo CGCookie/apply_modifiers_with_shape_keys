@@ -51,7 +51,7 @@ def evaluate_mesh(context, obj):
 
 
 def apply_modifier_to_object(context, obj, selected_modifiers):
-    ''' Disables all modifers except the selected ones
+    ''' Disables all modifiers except the selected ones
     Creates a new mesh from that output and swaps it out
     Removes the selected modifiers
     Deletes the old mesh and restores the other modifiers to what they were
@@ -61,7 +61,7 @@ def apply_modifier_to_object(context, obj, selected_modifiers):
     # Disable all modifiers (except selected)
     saved_enabled_modifiers = disable_modifiers(context, selected_modifiers)
 
-    # Make sure all selected modifers are enabled
+    # Make sure all selected modifiers are enabled
     for modifier_name in selected_modifiers:
         modifier = obj.modifiers.get(modifier_name)
         modifier.show_viewport = True
@@ -205,7 +205,7 @@ def restore_shape_key_drivers(obj, copy_obj,drivers, context):
                     # Copy each target for the variable
                     for idx, target in enumerate(var.targets):
                         new_var.targets[idx].id_type = target.id_type
-                        if target.id == copy_obj: # if the target is point to the copy object this should be changed to the orginal object
+                        if target.id == copy_obj: # if the target is point to the copy object this should be changed to the original object
                             target.id = obj
                         new_var.targets[idx].id = target.id
                         new_var.targets[idx].data_path = target.data_path
@@ -260,6 +260,9 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers):
     pin_setting = original_obj.show_only_shape_key
     saved_active_shape_key_index = original_obj.active_shape_key_index
 
+    if saved_active_shape_key_index == 0: # hack to prevent some modifiers from failing if 'Basis' is active
+        original_obj.active_shape_key_index = 1
+
     # Duplicate the object
     copy_obj = duplicate_object(original_obj)
 
@@ -276,7 +279,7 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers):
     # Add a basis shape key back to the original object
     original_obj.shape_key_add(name=copy_obj.data.shape_keys.key_blocks[0].name,from_mix=False)
 
-    # Loop over the original shape keys, create a temp mesh, apply single shape, apply modifers and merge back to the original (1 shape at a time)
+    # Loop over the original shape keys, create a temp mesh, apply single shape, apply modifiers and merge back to the original (1 shape at a time)
     for i, (key_block_name, properties) in enumerate(shape_key_properties.items()):
         # Create a temp object
         context.view_layer.objects.active = copy_obj
@@ -302,7 +305,7 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers):
             bpy.data.objects.remove(temp_obj)
             continue
 
-        # Transfer the temp object as a shape back to orginal
+        # Transfer the temp object as a shape back to original
         join_as_shape(temp_obj, original_obj)
 
         # Clean up the temp object

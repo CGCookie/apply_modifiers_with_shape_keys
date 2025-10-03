@@ -28,7 +28,7 @@ from .functions import apply_modifiers_with_shape_keys
 
 
 # Property Collection
-class ModifierList(bpy.types.PropertyGroup): 
+class ModifierList(bpy.types.PropertyGroup):
     apply_modifier: bpy.props.BoolProperty(name="", default=False)
 
 
@@ -48,12 +48,14 @@ class OBJECT_OT_apply_modifiers_with_shape_keys(bpy.types.Operator):
         return active_object and active_object.data.shape_keys and context.object.mode == 'OBJECT'
 
     def execute(self, context):
-        selected_modifiers = [o.name for o in self.collection_property if o.apply_modifier]
+        selected_modifiers = [
+            o.name for o in self.collection_property if o.apply_modifier]
         if not selected_modifiers:
             self.report({'ERROR'}, 'No modifiers selected!')
             return {'FINISHED'}
 
-        success, error_info = apply_modifiers_with_shape_keys(context, selected_modifiers)
+        success, error_info = apply_modifiers_with_shape_keys(
+            context, selected_modifiers)
         if not success:
             self.report({'ERROR'}, error_info)
 
@@ -63,10 +65,9 @@ class OBJECT_OT_apply_modifiers_with_shape_keys(bpy.types.Operator):
         show_armature_option = False
         self.layout.label(text="Select which modifier(s) to apply")
         box = self.layout.box()
-        
+
         for prop in self.collection_property:
             box.prop(prop, "apply_modifier", text=prop.name)
-
 
     def invoke(self, context, event):
         self.collection_property.clear()

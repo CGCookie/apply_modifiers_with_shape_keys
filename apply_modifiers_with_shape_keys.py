@@ -1,6 +1,6 @@
 '''
 Copyright (C) 2025 Wayne Dixon
-wayen@cgcookie.com
+wayne@cgcookie.com
 
 Created by Wayne Dixon
 
@@ -36,7 +36,7 @@ class ModifierList(bpy.types.PropertyGroup):
 class OBJECT_OT_apply_modifiers_with_shape_keys(bpy.types.Operator):
     ''' Apply selected modifiers to mesh even if it has shape keys '''
     bl_idname = "object.apply_modifiers_with_shape_keys"
-    bl_label = "Apply modifier(s) for mesh with shape keys"
+    bl_label = "Apply Modifier(s) for Mesh with Shape Keys"
     bl_options = {'REGISTER', 'UNDO'}
 
     collection_property: bpy.props.CollectionProperty(type=ModifierList)

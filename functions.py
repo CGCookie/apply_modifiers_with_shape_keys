@@ -1,6 +1,6 @@
 '''
 Copyright (C) 2025 Wayne Dixon
-wayen@cgcookie.com
+wayne@cgcookie.com
 Created by Wayne Dixon
     This file is part of Apply modifier with shape keys
     Export to .blend is free software; you can redistribute it and/or
@@ -181,7 +181,7 @@ def restore_shape_key_drivers(obj, copy_obj,drivers, context):
             continue
 
         for driver_data in shape_key_drivers:
-            # Extract the fcurve and property
+            # Extract the f-curve and property
             source_fcurve = driver_data["driver"]
             property_name = driver_data["property"]
 

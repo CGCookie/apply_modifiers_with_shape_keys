@@ -265,6 +265,8 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers):
 
     # Duplicate the object
     copy_obj = duplicate_object(original_obj)
+    # Cache the name of the first shape key before any risky operation later (needed if code runs from Quick Favorites)
+    key_name = copy_obj.data.shape_keys.key_blocks[0].name
 
     # Save the shape key properties
     shape_key_properties = save_shape_key_properties(original_obj)
@@ -273,17 +275,22 @@ def apply_modifiers_with_shape_keys(context, selected_modifiers):
     shape_key_drivers = save_shape_key_drivers(copy_obj, shape_key_properties[original_obj.active_shape_key.name])
 
     # Remove all shape keys and apply modifiers on the original
+    context.view_layer.objects.active = original_obj # Force original object to be active (needed if code runs from Quick Favorites)
     bpy.ops.object.shape_key_remove(all=True)
     apply_modifier_to_object(context, original_obj, selected_modifiers)
 
     # Add a basis shape key back to the original object
-    original_obj.shape_key_add(name=copy_obj.data.shape_keys.key_blocks[0].name,from_mix=False)
+    original_obj.shape_key_add(name=key_name, from_mix=False)
+    # original_obj.shape_key_add(name=copy_obj.data.shape_keys.key_blocks[0].name,from_mix=False)
 
     # Loop over the original shape keys, create a temp mesh, apply single shape, apply modifiers and merge back to the original (1 shape at a time)
     for i, (key_block_name, properties) in enumerate(shape_key_properties.items()):
         # Create a temp object
         context.view_layer.objects.active = copy_obj
         temp_obj = duplicate_object(copy_obj)
+
+        # Force Blender to evaluate new datablocks (needed if code runs from Quick Favorites)
+        bpy.context.view_layer.update()
 
         # Pin the shape we want
         temp_obj.show_only_shape_key = True
